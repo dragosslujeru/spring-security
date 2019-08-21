@@ -35,12 +35,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private static final String AUTHENTICATION_TOKEN = "Bearer %s";
 
     private static final int TEN_DAYS_MILLIS = 864000000;
-    private static final String JWT_SECRET = "n2r5u8x/A%D*G-KaPdSgVkYp3s6v9y$B&E(H+MbQeThWmZq4t7w!z%C*F-J@NcRf";
+    private final String jwtSecret;
 
-    public JwtAuthenticationFilter(RequestMatcher requiresAuthenticationRequestMatcher, AuthenticationManager authenticationManager, AuthenticationFailureHandler customAuthenticationEntryPoint) {
+    public JwtAuthenticationFilter(RequestMatcher requiresAuthenticationRequestMatcher, String jwtSecret, AuthenticationManager authenticationManager, AuthenticationFailureHandler customAuthenticationEntryPoint) {
         setRequiresAuthenticationRequestMatcher(requiresAuthenticationRequestMatcher);
         setAuthenticationManager(authenticationManager);
         setAuthenticationFailureHandler(customAuthenticationEntryPoint);
+        this.jwtSecret = jwtSecret;
     }
 
     @Override
@@ -85,7 +86,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .collect(Collectors.toList());
 
         return Jwts.builder()
-                .signWith(Keys.hmacShaKeyFor(JWT_SECRET.getBytes()), SignatureAlgorithm.HS512)
+                .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()), SignatureAlgorithm.HS512)
                 .setSubject(authentication.getName())
                 .setExpiration(new Date(System.currentTimeMillis() + TEN_DAYS_MILLIS))
                 .claim("role", roles)

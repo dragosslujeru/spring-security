@@ -20,4 +20,9 @@ public class HomeController {
         return Collections.singletonMap("message", "Login successful!");
     }
 
+    @GetMapping("/admin")
+    public Map<String, String> admin() {
+        return Collections.singletonMap("message", "Admin!");
+    }
+
 }

@@ -20,8 +20,18 @@ public class DataLoader {
         user.setPassword("password");
 
         Authority authority = new Authority();
-        authority.setAuthority("USER");
+        authority.setAuthority("ROLE_USER");
         user.addAuthority(authority);
         userRepository.save(user);
+
+        User admin = new User();
+        admin.setUsername("user2");
+        admin.setEnabled(true);
+        admin.setPassword("password");
+
+        Authority adminAuthority = new Authority();
+        adminAuthority.setAuthority("ROLE_ADMIN");
+        admin.addAuthority(adminAuthority);
+        userRepository.save(admin);
     }
 }
