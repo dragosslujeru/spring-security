@@ -8,8 +8,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -32,8 +33,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .cors().and()
-                .authorizeRequests().antMatchers("/**").authenticated().and()
-                .formLogin().disable()
+                .authorizeRequests()
+                .antMatchers("/login").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .addFilter(authenticationFilter())
+                .csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(accessDeniedHandler());
     }
 
@@ -49,7 +54,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public AuthenticationEntryPoint accessDeniedHandler() {
+    public JsonAccessDeniedHandler accessDeniedHandler() {
         return new JsonAccessDeniedHandler();
+    }
+
+    @Bean
+    public AuthenticationFailureHandler authenticationFailureHandler() {
+        return new JsonAuthenticationFailureHandler();
+    }
+    
+    
+    private UsernamePasswordAuthenticationFilter authenticationFilter() throws Exception {
+        return new JwtAuthenticationFilter(new AntPathRequestMatcher("/login"), authenticationManager(), authenticationFailureHandler());
     }
 }
